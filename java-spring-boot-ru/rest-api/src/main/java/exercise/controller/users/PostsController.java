@@ -1,5 +1,6 @@
 package exercise.controller.users;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,22 +18,24 @@ import exercise.Data;
 
 // BEGIN
 @RestController
-@RequestMapping("/api/users/{userId}/posts")
+@RequestMapping("/api/users/{id}/posts")
 public class PostsController {
-
-    @PostMapping
-    public ResponseEntity<Post> createPost(@PathVariable int userId, @RequestBody Post post) {
-        post.setUserId(userId);
-        Data.getPosts().add(post);
-        return new ResponseEntity<>(post, HttpStatus.CREATED);
-    }
+    private final List<Post> posts = new ArrayList<>(Data.getPosts());
 
     @GetMapping
-    public List<Post> getPosts(@PathVariable int userId) {
-        return Data.getPosts().stream()
-                .filter(p -> p.getUserId() == userId)
+    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable("id") int id) {
+        List<Post> userPosts = posts.stream()
+                .filter(p -> p.getUserId() == id)
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(userPosts);
+    }
+
+    @PostMapping
+    public ResponseEntity<Post> createPostForUser(@PathVariable("id") int id,
+                                                  @RequestBody Post post) {
+        post.setUserId(id);
+        posts.add(post);
+        return new ResponseEntity<>(post, HttpStatus.CREATED);
     }
 }
-
 // END
